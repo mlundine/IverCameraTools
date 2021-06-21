@@ -12,6 +12,8 @@ Python=3.7
 
 simplekml
 
+pandas
+
 numpy
 
 geopy
