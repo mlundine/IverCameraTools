@@ -288,10 +288,12 @@ def main(mission_id,camera_folder, photo_or_ground):
     mission_id (str): feed a string that defines the name of the mission, whatever you want
     camera_folder (str): full filepath to the camera folder of the iver mission
     photo_or_ground (str): 'ground' for ground overlay kmz, 'photo' for photo overlays
-    
+
+    Example usage:
+    main('uss_nina_footprint_seafloor_enhance',r'C:\MarkLundineSurface\iver\Camera','ground')
     """
     mission_csv = get_meta_data_mission(mission_id,camera_folder)
     print('Metadata read and saved to csv')
     kmz_path = kmz(mission_csv,photo_or_ground)
     print('Kmzs made')
-main('uss_nina_footprint_seafloor_enhance',r'C:\MarkLundineSurface\iver\Camera','ground')
+    
