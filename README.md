@@ -9,10 +9,17 @@ Code to compile metadata from images and to make kmzs of image footprints.
 # dependencies
 
 Python=3.7
+
 simplekml
+
 numpy
+
 geopy
+
 opencv
+
 PIL
+
 glob
+
 os
