@@ -5,3 +5,14 @@
 Code to compile metadata from images and to make kmzs of image footprints.
 
 ![Kmz snip](https://github.com/mlundine/IverCameraTools/blob/main/im1.PNG)
+
+# dependencies
+
+Python=3.7
+simplekml
+numpy
+geopy
+opencv
+PIL
+glob
+os
