@@ -231,48 +231,40 @@ def kmz(mission_csv, photo_or_ground):
         kml = simplekml.Kml()
         for i in range(len(df_filt)):
             im_path = df_filt['local_path'][i]
-            new_im_path = os.path.splitext(os.path.basename(im_path))[0]
-            enhance = r'C:\imagecor\Image_Correction_App\20210609_USS_Nina_Iver_Photos_Enhanced'
-            if wp == 'WP7':
-                wp = 'WP07'
-            enhance = os.path.join(enhance,wp)
-            for image in glob.glob(enhance + '/*.jpg'):
-                enhanceName = os.path.basename(image)
-                if enhanceName[0:8]==new_im_path:
-                    im_path = df_filt['local_path'][i]
-                    kml.addfile(image)
-                    im = df_filt['image'][i]
-                    lat = df_filt['latitude'][i]
-                    long = df_filt['longitude'][i]
-                    alt = df_filt['altitude'][i]
-                    head = df_filt['heading'][i]
-                    llx = df_filt['llx'][i]
-                    lly = df_filt['lly'][i]
-                    ll = (llx,lly)
-                    lrx = df_filt['lrx'][i]
-                    lry = df_filt['lry'][i]
-                    lr = (lrx,lry)
-                    urx = df_filt['urx'][i]
-                    ury = df_filt['ury'][i]
-                    ur = (urx,ury)
-                    ulx = df_filt['ulx'][i]
-                    uly = df_filt['uly'][i]
-                    ul = (ulx,uly)
-                    if photo_or_ground == 'ground':
-                        ground = kml.newgroundoverlay(name=im,
-                                                      altitude=alt,
-                                                      altitudemode = simplekml.GxAltitudeMode.relativetoseafloor)
-                        ground.icon.href = image
-                        ground.gxlatlonquad.coords = [ll,lr,
-                                                      ur,ul]
-                    if photo_or_ground =='photo':
-                        photo = kml.newphotooverlay(name=im)
-                        photo.camera = simplekml.Camera(longitude=-long, latitude=lat, altitude=alt,heading=head,
-                                                        altitudemode=simplekml.AltitudeMode.clamptoground)
-                        photo.point.coords = [(-long,lat)]
-                        photo.style.iconstyle.icon.href = im_path
-                        photo.icon.href = im_path
-                        photo.viewvolume = simplekml.ViewVolume(-25,25,-15,15,1)
+            im_path = df_filt['local_path'][i]
+            kml.addfile(image)
+            im = df_filt['image'][i]
+            lat = df_filt['latitude'][i]
+            long = df_filt['longitude'][i]
+            alt = df_filt['altitude'][i]
+            head = df_filt['heading'][i]
+            llx = df_filt['llx'][i]
+            lly = df_filt['lly'][i]
+            ll = (llx,lly)
+            lrx = df_filt['lrx'][i]
+            lry = df_filt['lry'][i]
+            lr = (lrx,lry)
+            urx = df_filt['urx'][i]
+            ury = df_filt['ury'][i]
+            ur = (urx,ury)
+            ulx = df_filt['ulx'][i]
+            uly = df_filt['uly'][i]
+            ul = (ulx,uly)
+            if photo_or_ground == 'ground':
+                ground = kml.newgroundoverlay(name=im,
+                                              altitude=alt,
+                                              altitudemode = simplekml.GxAltitudeMode.relativetoseafloor)
+                ground.icon.href = image
+                ground.gxlatlonquad.coords = [ll,lr,
+                                              ur,ul]
+            if photo_or_ground =='photo':
+                photo = kml.newphotooverlay(name=im)
+                photo.camera = simplekml.Camera(longitude=-long, latitude=lat, altitude=alt,heading=head,
+                                                altitudemode=simplekml.AltitudeMode.clamptoground)
+                photo.point.coords = [(-long,lat)]
+                photo.style.iconstyle.icon.href = im_path
+                photo.icon.href = im_path
+                photo.viewvolume = simplekml.ViewVolume(-25,25,-15,15,1)
         kmlpath = os.path.splitext(mission_csv)[0]+wp+'.kmz'
         kml.savekmz(kmlpath)
         kml = None
