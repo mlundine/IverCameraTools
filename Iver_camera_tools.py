@@ -115,7 +115,9 @@ def get_footprint(center_lat, center_long,
                       }
     return footprint_dict
 
-def get_meta_data_indv(image_path):
+def get_meta_data_indv(image_path,
+                       east_or_west,
+                       north_or_south):
     """
     reads Iver image metadata and outputs as a dictionary
     input:
@@ -167,6 +169,11 @@ def get_meta_data_indv(image_path):
     substr = userComment[speed_index:]
     speed = substr[0:substr.index(',')]
 
+    if east_or_west = 'west':
+        long = -long
+    if north_or_south = 'south':
+        lat = -lat
+    
     meta_data_dict = {'im':os.path.basename(image_path),
                       'path':image_path,
                       'latitude':lat,
@@ -182,7 +189,10 @@ def get_meta_data_indv(image_path):
                       'height':height}
     return meta_data_dict
 
-def get_meta_data_mission(mission_id,camera_path):
+def get_meta_data_mission(mission_id,
+                          camera_path,
+                          east_or_west,
+                          north_or_south):
     """
     saves metadata for each image to a csv
     inputs:
@@ -202,10 +212,10 @@ def get_meta_data_mission(mission_id,camera_path):
                           'geo_width','geo_height']]
     for wp in waypoints:
         for im in glob.glob(wp + '/*.jpg'):
-            meta = get_meta_data_indv(im)
+            meta = get_meta_data_indv(im, east_or_west, north_or_south)
             element = list(meta.values())
             element.append(os.path.basename(os.path.dirname(wp)))
-            footprint = get_footprint(float(meta['latitude']),-float(meta['longitude']),
+            footprint = get_footprint(float(meta['latitude']),float(meta['longitude']),
                                       float(meta['altitude']),float(meta['pitch']),
                                       float(meta['roll']),float(meta['heading']))
             element = element + list(footprint.values())
@@ -214,7 +224,7 @@ def get_meta_data_mission(mission_id,camera_path):
     np.savetxt(save_path, mission_meta_data, delimiter=",", fmt='%s')
     return save_path
 
-def kmz(mission_csv, photo_or_ground):
+def kmz(mission_csv, photo_or_ground, frequency):
     """
     makes kmzs of Iver images
     inputs:
@@ -224,15 +234,17 @@ def kmz(mission_csv, photo_or_ground):
     'photo' just places them at the lat, lon coordinate, not accurate footprint
     """
     df = pd.read_csv(mission_csv)
+    
     waypoints = df.waypoint.unique()
     for wp in waypoints:
         df_filt = df[df['waypoint']==wp]
         df_filt = df_filt.reset_index()
         kml = simplekml.Kml()
         for i in range(len(df_filt)):
+            if i%frequency != 0:
+                continue
             im_path = df_filt['local_path'][i]
-            im_path = df_filt['local_path'][i]
-            kml.addfile(image)
+            kml.addfile(im_path)
             im = df_filt['image'][i]
             lat = df_filt['latitude'][i]
             long = df_filt['longitude'][i]
@@ -254,14 +266,14 @@ def kmz(mission_csv, photo_or_ground):
                 ground = kml.newgroundoverlay(name=im,
                                               altitude=alt,
                                               altitudemode = simplekml.GxAltitudeMode.relativetoseafloor)
-                ground.icon.href = image
+                ground.icon.href = im_path
                 ground.gxlatlonquad.coords = [ll,lr,
                                               ur,ul]
             if photo_or_ground =='photo':
                 photo = kml.newphotooverlay(name=im)
-                photo.camera = simplekml.Camera(longitude=-long, latitude=lat, altitude=alt,heading=head,
+                photo.camera = simplekml.Camera(longitude=long, latitude=lat, altitude=alt,heading=head,
                                                 altitudemode=simplekml.AltitudeMode.clamptoground)
-                photo.point.coords = [(-long,lat)]
+                photo.point.coords = [(long,lat)]
                 photo.style.iconstyle.icon.href = im_path
                 photo.icon.href = im_path
                 photo.viewvolume = simplekml.ViewVolume(-25,25,-15,15,1)
@@ -270,7 +282,12 @@ def kmz(mission_csv, photo_or_ground):
         kml = None
     return kmlpath
     
-def main(mission_id,camera_folder, photo_or_ground):
+def main(mission_id,
+         camera_folder,
+         photo_or_ground,
+         east_or_west='west',
+         north_or_south='north'
+         frequency=1):
     """
     Will run all functions, reads the metadata of Iver mission photos
     Saves metadata to csv
@@ -280,12 +297,19 @@ def main(mission_id,camera_folder, photo_or_ground):
     mission_id (str): feed a string that defines the name of the mission, whatever you want
     camera_folder (str): full filepath to the camera folder of the iver mission
     photo_or_ground (str): 'ground' for ground overlay kmz, 'photo' for photo overlays
-
-    Example usage:
-    main('uss_nina_footprint_seafloor_enhance',r'C:\MarkLundineSurface\iver\Camera','ground')
-    """
-    mission_csv = get_meta_data_mission(mission_id,camera_folder)
-    print('Metadata read and saved to csv')
-    kmz_path = kmz(mission_csv,photo_or_ground)
-    print('Kmzs made')
+    east_or_west (str): 'east' for eastern hemisphere (positive longitudes), 'west' for western hemisphere (negative longitudes), default is 'west'
+    north_or_south (str): 'north' for northern hemisphere (positive latitudes), 'south' for southern hemisphere (negative latitudes), default is 'north'
+    frequency (int): frame frequency to use (5 would be only use every 5 frames), default is 1
     
+    Example usage:
+    main('uss_nina_footprint_seafloor_enhance',r'C:\MarkLundineSurface\iver\Camera','ground', east_or_west='west', north_or_south='north', frequency=1)
+    """
+    mission_csv = get_meta_data_mission(mission_id,
+                                        camera_folder,
+                                        east_or_west,
+                                        north_or_south)
+    print('Metadata read and saved to csv')
+    kmz_path = kmz(mission_csv,
+                   photo_or_ground,
+                   frequency)
+    print('Kmzs made')
