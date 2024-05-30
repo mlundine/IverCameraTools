@@ -169,10 +169,10 @@ def get_meta_data_indv(image_path,
     substr = userComment[speed_index:]
     speed = substr[0:substr.index(',')]
 
-    if east_or_west = 'west':
-        long = -long
-    if north_or_south = 'south':
-        lat = -lat
+    if east_or_west == 'west':
+        long = -float(long)
+    if north_or_south == 'south':
+        lat = -float(lat)
     
     meta_data_dict = {'im':os.path.basename(image_path),
                       'path':image_path,
